@@ -902,6 +902,8 @@ var FloydWarshall2 = function () {
 			// console.log("resultWeight", resultWeight);
 			// console.log("ikWeight", ikWeight);
 			// console.log("kjWeight", kjWeight);
+			console.log("result PathMatrix");
+			this.displayMatrix(resultPathMatrixOfK);
 			var currentPath = previousPathMatrix[iStart][jDest];
 			var resultPath = resultPathMatrixOfK[iStart][jDest];
 			var ikPath = previousPathMatrix[iStart][k];
@@ -1452,7 +1454,7 @@ var fw = new FloydWarshall2(weights, numVertices);
 var offSetColor = "#D3D3D3"; // grey
 
 var offSetColorNode = "#D3D3D3"; //blue
-var smallNodeSize = 10;
+var smallNodeSize = 15;
 var bigNodeSize = 20;
 
 var highlightColor = "#00cc44"; //red
@@ -1541,8 +1543,8 @@ function resetSingleNode(thisNode) {
   console.log("resetSingleNode", thisNode);
   d3.select(thisNode).select("circle").transition().duration(750).attr("r", smallNodeSize).style("fill", offSetColorNode);
 
-  d3.select(thisNode).select("text").transition().duration(750).attr("x", -3.5).style("stroke", "none").style("fill", letterColor).style("stroke", "none").style("font", "10px sans-serif").text(function (d) {
-    return d.name;
+  d3.select(thisNode).select("text").transition().duration(750).attr("x", -3.5).style("stroke", "none").style("fill", letterColor).style("stroke", "none").style("font-size", "15px").style("font-family", "Futura").text(function (d) {
+    return "0" + d.name;
   });
   thisNode = null;
 }
@@ -1638,8 +1640,9 @@ function getSelectedNode(integerNum, node) {
 }
 
 function highlightSingleNode(thisNode, color, label) {
-  d3.select(thisNode).select("text").transition().duration(750).attr("x", -3.5).style("stroke", "#87CEFA").style("stroke-width", ".5px").style("font", "20px sans-serif").text(function (d) {
-    var modifiedName = d.name + "   " + label;
+  console.log("highlightSingleNode:", thisNode);
+  d3.select(thisNode).select("text").transition().duration(750).attr("x", -3.5).style("stroke", "#87CEFA").style("stroke-width", ".5px").style("font-size", "20px").style("font-family", "Futura").text(function (d) {
+    var modifiedName = "0" + d.name + "   " + label;
     return modifiedName;
   });
 
@@ -1804,9 +1807,9 @@ var NetworkSteps = function (_D3Component) {
       node.append("svg:circle").attr("r", smallNodeSize).style("fill", offSetColorNode);
 
       // add the text
-      node.append("text").attr("x", -3.5).attr("dy", ".15em").text(function (d) {
-        return d.name;
-      });
+      node.append("text").attr("class", "nodetext").attr("x", -3.5).attr("dx", "-.35em").attr("dy", ".35em").text(function (d) {
+        return "0" + d.name;
+      }).style("font-size", "15px").style("font-family", "Futura");
       //node.on("click", click);
 
 
@@ -1856,6 +1859,7 @@ var NetworkSteps = function (_D3Component) {
       var i = thisStep[2];
       var j = thisStep[3];
       console.log("CURRENT K NODE", this.currentKNode);
+      console.log("ikj_startNode", this.ikj_startNode);
       if (k != this.currentKNode) {
         if (this.k_destNode != null) {
           resetSingleNode(this.k_destNode);
@@ -1898,59 +1902,68 @@ var NetworkSteps = function (_D3Component) {
 
       console.log(thisStep);
       if (k != j && k != i && i != j) {
+        console.log("NETWORK: i!j!k");
 
         var ikjPath = fw.findPathsOverVertexK(thisStep);
-        if (ikjPath.get_resultPath() != null) {
-          console.log("i: ", i, "| j: ", j);
-          this.ikj_startNode = getSelectedNode(i, this.node);
-          this.ikj_destNode = getSelectedNode(j, this.node);
+        // if (ikjPath.get_resultPath() != null) {
+        console.log("i: ", i, "| j: ", j);
+        this.ikj_startNode = getSelectedNode(i, this.node);
+        this.ikj_destNode = getSelectedNode(j, this.node);
 
-          if (k != i) {
-            console.log("I START", i, " ", k);
-            console.log("ikj_startNode", this.ikj_startNode);
-            highlightSingleNode(this.ikj_startNode, highlightColor2ndStart, "Start");
-          }
-          if (k != j) {
-            highlightSingleNode(this.ikj_destNode, highlightColor, "Ziel");
-          }
-
-          if (ikjPath.get_ikPathWay() != null) {
-            var ikPath = ikjPath.get_ikPathWay();
-
-            this.currentColouredEdges_ikj_ik = highlightShortestPath(ikPath, intermediateColor, this.path, this.colorEdgeMatrix);
-            this.currentColouredLabel_ikj_ik = highlightLabels(ikPath, intermediateColor, this.edgelabels);
-            //this.currentColouredLabel_ikj_ik = highlightLabels(ikPath, this.edgelabels);
-          }
-
-          if (ikjPath.get_ikPathWeight() != null) {
-            ikWeight = ikjPath.get_ikPathWeight();
-            // ikWeight = ikWeight.fontcolor(highlightColor);
-          } else {
-            ikWeight = null;
-          }
-
-          if (ikjPath.get_kjPathWay() != null) {
-            var kjPath = ikjPath.get_kjPathWay();
-            this.currentColouredEdges_ikj_kj = highlightShortestPath(kjPath, intermediateColor_kj, this.path, this.colorEdgeMatrix);
-            console.log("aufruf labels", this.edgelabels);
-            this.currentColouredLabel_ikj_kj = highlightLabels(kjPath, intermediateColor_kj, this.edgelabels);
-            //this.currentColouredLabel_ikj_kj = highlightLabels(kjPath, this.edgelabels);
-          }
-
-          if (ikjPath.get_kjPathWeight() != null) {
-            kjWeight = ikjPath.get_kjPathWeight();
-          } else {
-            kjWeight = null;
-          }
-
-          updateDisplay_ikj(i, k, j, ikWeight, kjWeight, this.title, this.pathStr, this.sum);
-
-          // if (ikjPath.get_previousPathWay() != null) {
-          // var previousPath = ikjPath.get_previousPathWay();
-          // currentColouredEdges_ikj = highlightShortestPath_BOLT(previousPath, bigWidthEdge*1.5);
-          // //currentColouredLabel_ikj = highlightLabels(previousPath, highlightColor);
-          // }
+        if (k != i) {
+          console.log("I START", i, " ", k);
+          console.log("ikj_startNode", this.ikj_startNode);
+          highlightSingleNode(this.ikj_startNode, highlightColor2ndStart, "Start");
         }
+        if (k != j) {
+          highlightSingleNode(this.ikj_destNode, highlightColor, "Ziel");
+        }
+
+        if (ikjPath.get_ikPathWay() != null) {
+          var ikPath = ikjPath.get_ikPathWay();
+
+          this.currentColouredEdges_ikj_ik = highlightShortestPath(ikPath, intermediateColor, this.path, this.colorEdgeMatrix);
+          this.currentColouredLabel_ikj_ik = highlightLabels(ikPath, intermediateColor, this.edgelabels);
+          //this.currentColouredLabel_ikj_ik = highlightLabels(ikPath, this.edgelabels);
+        }
+
+        if (ikjPath.get_ikPathWeight() != null) {
+          ikWeight = ikjPath.get_ikPathWeight();
+          // ikWeight = ikWeight.fontcolor(highlightColor);
+        } else {
+          ikWeight = null;
+        }
+
+        if (ikjPath.get_kjPathWay() != null) {
+          var kjPath = ikjPath.get_kjPathWay();
+          this.currentColouredEdges_ikj_kj = highlightShortestPath(kjPath, intermediateColor_kj, this.path, this.colorEdgeMatrix);
+          console.log("aufruf labels", this.edgelabels);
+          this.currentColouredLabel_ikj_kj = highlightLabels(kjPath, intermediateColor_kj, this.edgelabels);
+          //this.currentColouredLabel_ikj_kj = highlightLabels(kjPath, this.edgelabels);
+        }
+
+        if (ikjPath.get_kjPathWeight() != null) {
+          kjWeight = ikjPath.get_kjPathWeight();
+        } else {
+          kjWeight = null;
+        }
+
+        updateDisplay_ikj(i, k, j, ikWeight, kjWeight, this.title, this.pathStr, this.sum);
+
+        // if (ikjPath.get_previousPathWay() != null) {
+        // var previousPath = ikjPath.get_previousPathWay();
+        // currentColouredEdges_ikj = highlightShortestPath_BOLT(previousPath, bigWidthEdge*1.5);
+        // //currentColouredLabel_ikj = highlightLabels(previousPath, highlightColor);
+        // }
+
+        // }else{
+        // 	console.log("ikjPath = null!");
+        // 	this.ikj_startNode = getSelectedNode(i,this.node);
+        // 	this.ikj_destNode = getSelectedNode(j,this.node);
+        // 	highlightSingleNode(this.ikj_startNode, highlightColor2ndStart,"Start");
+        // 	highlightSingleNode(this.ikj_destNode, highlightColor,"Ziel");
+        // 	updateDisplay_ikj(i, k, j, ikWeight, kjWeight,this.title, this.pathStr, this.sum);
+        // }
         if (k != this.currentKNode) {
           if (this.k_destNode != null) {
             resetSingleNode(this.k_destNode);
@@ -2089,6 +2102,132 @@ var D3FinalMatrix = function (_D3Component) {
 			var canvas = this.canvas = d3.select(node).append("svg").attr("width", w).attr("height", h);
 
 			var Ducs = fw.getAllMatrices()[5].matrix;
+			// concatenate 2d array in one list
+			var data = MatrixToList(ducsToMatrix(Ducs));
+			// Group that contains every element of the Matrix
+			var matrixGroup = this.matrixGroup = canvas.append("g");
+
+			// marks contains text to set around the matrix in order to see rows and cols
+			var marks = [];
+			for (var i = 1; i <= dim; i++) {
+				marks = marks.concat("0" + i.toString());
+			}
+			for (var i = 1; i <= dim; i++) {
+				marks = marks.concat("0" + i.toString());
+			}
+			var position = [1, 2];
+			var onCompPosition = [1, 1];
+			var singlePoint = [1];
+			var leftMatrixBorder = [{ x: xOffset - 10, y: yOffset - 15 }, { x: xMarkOffset + 5, y: yOffset + 0.5 * (dim - 1) * yDistance }, { x: xOffset - 10, y: yOffset + (dim - 1) * yDistance + 15
+			}];
+			var rightMatrixBorder = [{ x: xOffset + (dim - 1) * xDistance + 20, y: yOffset - 15 }, { x: xMarkOffset + dim * xDistance + 20, y: yOffset + 0.5 * (dim - 1) * yDistance }, { x: xOffset + (dim - 1) * xDistance + 20, y: yOffset + (dim - 1) * yDistance + 15
+			}];
+			var ijk = ["1", "1", "1"];
+			// line genarator
+			var line = d3.line().x(function (d) {
+				return d.x;
+			}).y(function (d) {
+				return d.y;
+			}).curve(d3.curveBasis);
+
+			matrixGroup.append("path").attr("class", "border").attr("d", line(leftMatrixBorder)).attr("fill", "none").attr("stroke", "black").attr("stroke-width", 2);
+
+			matrixGroup.append("path").attr("class", "border").attr("d", line(rightMatrixBorder)).attr("fill", "none").attr("stroke", "black").attr("stroke-width", 2);
+
+			matrixGroup.selectAll("text.elements").data(data).enter().append("text").text(function (d) {
+				return d;
+			}).attr("class", "elements").attr("x", function (d, i) {
+				return i % dim * xDistance + xOffset;
+			}).attr("y", function (d, i) {
+				return Math.floor(i / dim) * yDistance + yOffset;
+			}).attr("text-anchor", "middle").attr("dominant-baseline", "middle").attr("font-size", 25);
+		}
+	}, {
+		key: 'update',
+		value: function update(props, oldProps) {}
+	}]);
+
+	return D3FinalMatrix;
+}(D3Component);
+
+module.exports = D3FinalMatrix;
+
+},{"./FloydWarshall":"/home/ben/Desktop/Visualization/PIG/components/FloydWarshall.js","d3":"/home/ben/Desktop/Visualization/PIG/node_modules/d3/build/d3.node.js","idyll-d3-component":"/home/ben/Desktop/Visualization/PIG/node_modules/idyll-d3-component/lib.js","react":"react"}],"/home/ben/Desktop/Visualization/PIG/components/d3InitMatrix.js":[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var React = require('react');
+var D3Component = require('idyll-d3-component');
+var d3 = require('d3');
+var FloydWarshall = require('./FloydWarshall');
+
+//const size = 6000;
+var w = 400;
+var h = 400;
+
+var xOffset = 65;
+var yOffset = 65;
+var yDistance = 60;
+var xDistance = 60;
+var xMarkOffset = 25;
+var yMarkOffset = 25;
+var xCompOffset = xOffset - 15;
+var yCompOffset = yOffset - 15;
+var xCompDist = 30;
+var yCompDist = 30;
+var rectDist = 10;
+var dim = 5;
+
+var row = 2;
+var col = 1;
+
+function MatrixToList(matrix) {
+	var data = [];
+	for (var i = 0; i < dim; i++) {
+		data = data.concat(matrix[i]);
+	}
+	return data;
+}
+function ducsToMatrix(ducs) {
+	var dataset = [["", "", "", "", ""], ["", "", "", "", ""], ["", "", "", "", ""], ["", "", "", "", ""], ["", "", "", "", ""]];
+
+	for (var i = 0; i < dim; i++) {
+		for (var j = 0; j < dim; j++) {
+			if (ducs[i][j] > 900) {
+				dataset[i][j] = "∞";
+			} else {
+				dataset[i][j] = ducs[i][j].toString();
+			}
+		}
+	}
+	return dataset;
+}
+var weights = [[0, 1, 3], [0, 4, -4], [0, 2, 8], [1, 4, 7], [1, 3, 1], [2, 1, 4], [3, 2, -5], [3, 0, 2], [4, 3, 6]];
+var numVertices = 5;
+var fw = new FloydWarshall(weights, numVertices);
+
+var D3FinalMatrix = function (_D3Component) {
+	_inherits(D3FinalMatrix, _D3Component);
+
+	function D3FinalMatrix() {
+		_classCallCheck(this, D3FinalMatrix);
+
+		return _possibleConstructorReturn(this, (D3FinalMatrix.__proto__ || Object.getPrototypeOf(D3FinalMatrix)).apply(this, arguments));
+	}
+
+	_createClass(D3FinalMatrix, [{
+		key: 'initialize',
+		value: function initialize(node, props) {
+			var canvas = this.canvas = d3.select(node).append("svg").attr("width", w).attr("height", h);
+
+			var Ducs = fw.getAllMatrices()[0].matrix;
 			// concatenate 2d array in one list
 			var data = MatrixToList(ducsToMatrix(Ducs));
 			// Group that contains every element of the Matrix
@@ -2547,19 +2686,31 @@ var D3Matrix = function (_D3Component) {
 			this.matrixGroup.selectAll("text.elements").filter(function (d, n) {
 				return n === j - 1 + dim * (k - 1);
 			}).transition().duration(50).attr("fill", "#00cc44").attr("font-size", 30);
+
+			this.matrixGroup.selectAll("text.marks").filter(function (d, n) {
+				return n === j - 1;
+			}).attr("fill", "#00cc44");
+
+			this.matrixGroup.selectAll("text.marks").filter(function (d, n) {
+				return n === dim + i - 1;
+			}).attr("fill", "#ff5959");
+
+			this.matrixGroup.selectAll("text.marks").filter(function (d, n) {
+				return n !== j - 1 && n !== dim + i - 1;
+			}).attr("fill", "black");
 			// animation if there is a change in the matrix
 			if (oldMatrix[i - 1][j - 1] != newMatrix[i - 1][j - 1]) {
 				this.matrixGroup.selectAll("text.elements").filter(function (d, n) {
 					return n === j - 1 + dim * (i - 1);
-				}).style("opacity", 0).transition().duration(800).style("opacity", 1).attr("fill", "white").attr("font-size", 30);
+				}).style("opacity", 0).transition().duration(500).style("opacity", 1).attr("fill", "white").attr("font-size", 40).transition().duration(300).attr("font-size", 30);
 
 				this.matrixGroup.selectAll("text.elements").filter(function (d, n) {
 					return n === k - 1 + dim * (i - 1);
-				}).style("opacity", 0).transition().duration(200).style("opacity", 1).attr("fill", "#00cc44").attr("font-size", 30);
+				}).style("opacity", 0).transition().duration(200).style("opacity", 1).attr("fill", "#ff5959").attr("font-size", 30);
 
 				this.matrixGroup.selectAll("text.elements").filter(function (d, n) {
 					return n === j - 1 + dim * (k - 1);
-				}).style("opacity", 0).transition().duration(200).style("opacity", 1).attr("fill", "#ff5959").attr("font-size", 30);
+				}).style("opacity", 0).transition().duration(200).style("opacity", 1).attr("fill", "#00cc44").attr("font-size", 30);
 
 				// HERE I want to move copies of the comparator values to move to the new value
 
@@ -2582,7 +2733,7 @@ var D3Matrix = function (_D3Component) {
 			}
 
 			// make all others one black again
-			console.log("blend black i", i, "j", j, j - 2 + 5 * (i - 1));
+			// console.log("blend black i",i,"j",j,j-2 + (5*(i-1)));
 			this.matrixGroup.selectAll("text.elements").filter(function (d, n) {
 				return n !== j - 1 + 5 * (i - 1);
 			}).attr("fill", "black").attr("font-size", 25);
@@ -3119,7 +3270,7 @@ var SmallD3Matrix = function (_D3Component) {
 		value: function initialize(node, props) {
 			var canvas = this.canvas = d3.select(node).append("svg").attr("width", w).attr("height", h);
 
-			var Matrix = [["0", "∞", "∞"], ["1", "0", "-2"], ["2", "5", "0"]];
+			var Matrix = [["0", "∞", "2"], ["1", "0", "5"], ["∞", "-2", "0"]];
 			// concatenate 2d array in one list
 			var data = MatrixToList(Matrix);
 			// Group that contains every element of the Matrix
@@ -69791,7 +69942,7 @@ function extend() {
 },{}],"__IDYLL_AST__":[function(require,module,exports){
 "use strict";
 
-module.exports = [["var", [["name", ["value", "dim"]], ["value", ["value", 5]]], []], ["var", [["name", ["value", "newMatrix"]], ["value", ["value", 0]]], []], ["var", [["name", ["value", "step"]], ["value", ["value", 0]]], []], ["var", [["name", ["value", "k"]], ["value", ["value", 1]]], []], ["var", [["name", ["value", "i"]], ["value", ["value", 2]]], []], ["var", [["name", ["value", "j"]], ["value", ["value", 2]]], []], ["var", [["name", ["value", "ignite"]], ["value", ["value", 0]]], []], ["var", [["name", ["value", "visnum"]], ["value", ["value", 0]]], []], ["TextContainer", [], [["Header", [["title", ["value", "KÜRZESTE WEGE IN NETZWERKEN"]], ["subtitle", ["value", "Am Beispiel des Floyd-Warshall Algorithmus"]], ["author", ["value", "Duc, Thomas, Ben"]]], []], ["Fixed2", [["visnum", ["variable", "visnum"]]], [["blankComponent", [], []], ["p", [], [["h3", [], ["Klicke zwei Knoten an"]]]], ["NetworkClick", [], []], ["p", [], [["D3Matrix", [["ignite", ["variable", "ignite"]], ["i", ["variable", "i"]], ["j", ["variable", "j"]], ["k", ["variable", "k"]]], []], ["Button", [["onClick", ["expression", "\n      step--;\n      k = Math.floor( (step-1)/((dim-1)*(dim-1)))%(dim)+1;\n  \t\tj = (step-1)%(dim-1) +1;\n      // if j>=k: j++\n  \t\tif (((step-1)%(dim-1) +1)>=(Math.floor( (step-1)/((dim-1)*(dim-1)))%(dim)+1)){\n        j = (step-1)%(dim-1) +2;\n  \t\t};\n  \t\ti = Math.floor((step-1)/(dim-1))%(dim-1)+1;\n      // if i>=k: i++\n  \t\tif ((Math.floor((step-1)/(dim-1))%(dim-1)+1)>=(Math.floor( (step-1)/((dim-1)*(dim-1)))%(dim)+1)){\n  \t\t\ti = Math.floor((step-1)/(dim-1))%(dim-1)+2;\n  \t\t};\n      "]]], ["\n  <"]], " ", ["Button", [["onClick", ["expression", "\n      step++;\n      k = Math.floor( (step+1)/((dim-1)*(dim-1)))%(dim)+1;\n  \t\tj = (step+1)%(dim-1) +1;\n      // if j>=k: j++\n  \t\tif (((step+1)%(dim-1) +1)>=(Math.floor( (step+1)/((dim-1)*(dim-1)))%(dim)+1)){\n        j = (step+1)%(dim-1) +2;\n  \t\t};\n  \t\ti = Math.floor((step+1)/(dim-1))%(dim-1)+1;\n      // if i>=k: i++\n  \t\tif ((Math.floor((step+1)/(dim-1))%(dim-1)+1)>=(Math.floor( (step+1)/((dim-1)*(dim-1)))%(dim)+1)){\n  \t\t\ti = Math.floor((step+1)/(dim-1))%(dim-1)+2;\n  \t\t};\n      "]]], ["\n  >"]]]]]], ["h2", [], ["Was ist ein Netzwerk?"]], ["p", [], ["Ein Netzwerk besteht aus einer Menge von eindeutigen Punkten, die Knoten genannt werden."]], ["p", [], [["SVG", [["src", ["value", "static/images/Nodes4.svg"]]], []], ["br", [], []], "\nDiese Knoten können durch sogenannte Kanten verbunden sein. Gilt die Kante zwischen zwei Knoten\nfür beide Richtungen, so spricht man von einem ungerichteten Graphen"]], ["SVG", [["src", ["value", "static/images/Undirected4.svg"]]], []], ["p", [], ["Im Gegenteil kann auch eine Kante nur für eine Richtung gelten. Deshalb wird der folgende Graph auch\ngerichteter Graph genannt."]], ["SVG", [["src", ["value", "static/images/Directed5.svg"]]], []], ["p", [], ["Außerdem kann jede Kante ein Gewicht haben. Das nächste Bild zeigt einen vollständigen Graphen."]], ["SVG", [["src", ["value", "static/images/WithWeights2.svg"]]], []], ["p", [], ["Jedes Netzwerk ist definiert durch die Anzahl der Knoten und die Kanten, welche sie verbinden. Dadurch kann man\nzu jeden Netzwerk eine Matrix angeben, die die Verbindungen des Netzwerks abbildet. Diese Matrix wird ", ["link", [["text", ["value", "Adjazenzmatrix"]], ["url", ["value", "https://de.wikipedia.org/wiki/Adjazenzmatrix"]]], []], " genannt. Der Matrixeintrag mit Spalte 1 und Zeile 2\ngibt dann das Gewicht der Verbindung von Knoten 1 zum Knoten 2 an. Gibt es keine Verbindung von 1 nach 2, dann wird das Gewicht als\nunendlich aufgefasst.", ["SmallD3Matrix", [], []]]], ["h2", [], ["Dynamische Programmierung"]], ["p", [], ["Dynamische Programmierung ist eine Methode zum algorithmischen Lösen eines Optimierungsproblems, indem dieses in gleichartige Teilprobleme zerlegt wird und die Zwischenresultaten systematische gespeichert werden.\nWie die Teile-und-Beherrsche-Methode löst die dynamische Programmierung Probleme, indem sie die Lösungen von Teilproblemen kombiniert. Diese Teilprobleme können sich dabei überlappen,\nd.h. wenn die Teilprobleme ihrerseits jeweils die gleichen Teil-Teil-probleme lösen müssen. Das DP löst jedes Teilproblem genau einmal und speichert dessen Lösung als Teilergebnis in einer Tabelle oder auch Matrix\nab. Dadurch vermeiden wir den Aufwand, die Lösung eines Teilteilproblems jedes Mal wieder neu zu berechnen, wenn es uns wieder begegnet."]], ["p", [], ["Als einer der klassischen Vertreter der dynamischen Programmierung kann der Floyd-Warshall-Algorithmus das kürzeste-Pfad-Problem für alle Knotenpaare auf einen gerichteten Graphen lösen."]], ["h2", [], ["Der Floyd-Warshall-Algorithmus"]], ["p", [], ["Der Floyd-Warshall-Algorithmus nutzt das Prinzip der dynamischen Programmierung, um in einem gewichteten Graphen den kürzesten Pfad zwischen allen Paaren von Knoten zu berechnen.\nFür alle Knoten mit dem Index k zwischen 1 und N (N ist die Anzahl der Knoten des Graphen) wird überprüft, ob der bisher bekannte Pfad zwischen Knotenpaaren verkürzt wird wenn er\nüber den Knoten k führt (und sich damit aus den 2 Teilpfaden von den Knoten zu k zusammensetzt) oder nicht.\nDabei wird die Matrix für jeden Knoten k von 1 bis N aufgerufen, die Veränderungen werden gespeichert und dann als Grundlage für die nächste Iteration verwendet."]], ["p", [], ["Unten siehst du das gleiche Netzerk, wie rechts. Um die Adjazensmatrix des Netzwerks zu sehen, drücke ", ["action", [["onClick", ["expression", "if(visnum==0){visnum=1}else{visnum=0};"]]], ["hier"]], ".", ["NetworkSteps", [["i", ["variable", "i"]], ["j", ["variable", "j"]], ["k", ["variable", "k"]]], []], ["Button", [["onClick", ["expression", "\n    step--;\n    k = Math.floor( (step-1)/((dim-1)*(dim-1)))%(dim)+1;\n    j = (step-1)%(dim-1) +1;\n    // if j>=k: j++\n    if (((step-1)%(dim-1) +1)>=(Math.floor( (step-1)/((dim-1)*(dim-1)))%(dim)+1)){\n      j = (step-1)%(dim-1) +2;\n    };\n    i = Math.floor((step-1)/(dim-1))%(dim-1)+1;\n    // if i>=k: i++\n    if ((Math.floor((step-1)/(dim-1))%(dim-1)+1)>=(Math.floor( (step-1)/((dim-1)*(dim-1)))%(dim)+1)){\n      i = Math.floor((step-1)/(dim-1))%(dim-1)+2;\n    };\n    "]]], ["\n<"]], " ", ["Button", [["onClick", ["expression", "\n    step++;\n    k = Math.floor( (step+1)/((dim-1)*(dim-1)))%(dim)+1;\n    j = (step+1)%(dim-1) +1;\n    // if j>=k: j++\n    if (((step+1)%(dim-1) +1)>=(Math.floor( (step+1)/((dim-1)*(dim-1)))%(dim)+1)){\n      j = (step+1)%(dim-1) +2;\n    };\n    i = Math.floor((step+1)/(dim-1))%(dim-1)+1;\n    // if i>=k: i++\n    if ((Math.floor((step+1)/(dim-1))%(dim-1)+1)>=(Math.floor( (step+1)/((dim-1)*(dim-1)))%(dim)+1)){\n      i = Math.floor((step+1)/(dim-1))%(dim-1)+2;\n    };\n    "]]], ["\n>"]]]], ["p", [], ["Der Pseudocode unten zeigt dir welcher Vergleich für jede Iteration gemacht wird."]], ["D3Pseudocode", [["className", ["value", "d3-component"]], ["newPseudocode", ["variable", "newPseudocode"]], ["state", ["variable", "state"]], ["i", ["variable", "i"]], ["k", ["variable", "k"]], ["j", ["variable", "j"]]], []], ["p", [], ["Nachdem du ein paar Schritte durchgegangen bist, hast du das Prinzip bestimmt verstanden. Wir hoffen mit der Visualisierung\ngeholfen zu haben!"]], ["p", [], ["Lizenz: ", ["link", [["text", ["value", "CC-BY-SA 2.0"]], ["url", ["value", "https://creativecommons.org/licenses/by-sa/2.0/"]]], []]]], ["h2", [], ["Resultat des Algorithmus"]], ["p", [], ["Die ursprüngliche Matrix sah so aus:", ["D3Matrix", [], []], "\nDie finale Matrix sieht nun so aus:", ["D3FinalMatrix", [["ignite", ["value", 0]], ["i", ["value", 4]], ["j", ["value", 4]], ["k", ["value", 5]]], []]]]]]];
+module.exports = [["var", [["name", ["value", "dim"]], ["value", ["value", 5]]], []], ["var", [["name", ["value", "newMatrix"]], ["value", ["value", 0]]], []], ["var", [["name", ["value", "step"]], ["value", ["value", 0]]], []], ["var", [["name", ["value", "k"]], ["value", ["value", 1]]], []], ["var", [["name", ["value", "i"]], ["value", ["value", 2]]], []], ["var", [["name", ["value", "j"]], ["value", ["value", 2]]], []], ["var", [["name", ["value", "ignite"]], ["value", ["value", 0]]], []], ["var", [["name", ["value", "visnum"]], ["value", ["value", 0]]], []], ["TextContainer", [], [["Header", [["title", ["value", "KÜRZESTE WEGE IN NETZWERKEN"]], ["subtitle", ["value", "Am Beispiel des Floyd-Warshall Algorithmus"]], ["author", ["value", "Duc, Thomas, Ben"]]], []], ["Fixed2", [["visnum", ["variable", "visnum"]]], [["blankComponent", [], []], ["p", [], [["h3", [], ["Klicke zwei Knoten an"]]]], ["NetworkClick", [], []], ["p", [], [["D3Matrix", [["ignite", ["variable", "ignite"]], ["i", ["variable", "i"]], ["j", ["variable", "j"]], ["k", ["variable", "k"]]], []], ["Button", [["onClick", ["expression", "\n      step--;\n      k = Math.floor( (step-1)/((dim-1)*(dim-1)))%(dim)+1;\n  \t\tj = (step-1)%(dim-1) +1;\n      // if j>=k: j++\n  \t\tif (((step-1)%(dim-1) +1)>=(Math.floor( (step-1)/((dim-1)*(dim-1)))%(dim)+1)){\n        j = (step-1)%(dim-1) +2;\n  \t\t};\n  \t\ti = Math.floor((step-1)/(dim-1))%(dim-1)+1;\n      // if i>=k: i++\n  \t\tif ((Math.floor((step-1)/(dim-1))%(dim-1)+1)>=(Math.floor( (step-1)/((dim-1)*(dim-1)))%(dim)+1)){\n  \t\t\ti = Math.floor((step-1)/(dim-1))%(dim-1)+2;\n  \t\t};\n      "]]], ["\n  <"]], " ", ["Button", [["onClick", ["expression", "\n      step++;\n      k = Math.floor( (step+1)/((dim-1)*(dim-1)))%(dim)+1;\n  \t\tj = (step+1)%(dim-1) +1;\n      // if j>=k: j++\n  \t\tif (((step+1)%(dim-1) +1)>=(Math.floor( (step+1)/((dim-1)*(dim-1)))%(dim)+1)){\n        j = (step+1)%(dim-1) +2;\n  \t\t};\n  \t\ti = Math.floor((step+1)/(dim-1))%(dim-1)+1;\n      // if i>=k: i++\n  \t\tif ((Math.floor((step+1)/(dim-1))%(dim-1)+1)>=(Math.floor( (step+1)/((dim-1)*(dim-1)))%(dim)+1)){\n  \t\t\ti = Math.floor((step+1)/(dim-1))%(dim-1)+2;\n  \t\t};\n      "]]], ["\n  >"]]]]]], ["h2", [], ["Was ist ein Netzwerk?"]], ["p", [], ["Ein Netzwerk besteht aus einer Menge von eindeutigen Punkten, die Knoten genannt werden."]], ["p", [], [["SVG", [["src", ["value", "static/images/Nodes4.svg"]]], []], ["br", [], []], "\nDiese Knoten können durch sogenannte Kanten verbunden sein. Gilt die Kante zwischen zwei Knoten\nfür beide Richtungen, so spricht man von einem ungerichteten Graphen"]], ["SVG", [["src", ["value", "static/images/Undirected4.svg"]]], []], ["p", [], ["Im Gegenteil kann auch eine Kante nur für eine Richtung gelten. Deshalb wird der folgende Graph auch\ngerichteter Graph genannt."]], ["SVG", [["src", ["value", "static/images/Directed5.svg"]]], []], ["p", [], ["Außerdem kann jede Kante ein Gewicht haben. Das nächste Bild zeigt einen vollständigen Graphen."]], ["SVG", [["src", ["value", "static/images/WithWeights2.svg"]]], []], ["p", [], ["Jedes Netzwerk ist definiert durch die Anzahl der Knoten und die Kanten, welche sie verbinden. Dadurch kann man\nzu jeden Netzwerk eine Matrix angeben, die die Verbindungen des Netzwerks abbildet. Diese Matrix wird", ["link", [["text", ["value", "Adjazenzmatrix"]], ["url", ["value", "https://de.wikipedia.org/wiki/Adjazenzmatrix"]]], []], " genannt. Der Matrixeintrag in Zeile 1 und Spalte 2\ngibt das Gewicht der Verbindung von Knoten 1 zum Knoten 2 an. Gibt es keine Verbindung von 1 nach 2, wird das Gewicht als\nunendlich aufgefasst.", ["SmallD3Matrix", [], []]]], ["h2", [], ["Dynamische Programmierung"]], ["p", [], ["Dynamische Programmierung ist eine Methode zum algorithmischen Lösen eines Optimierungsproblems, indem dieses in gleichartige Teilprobleme zerlegt wird und die Zwischenresultaten systematische gespeichert werden.\nWie die Teile-und-Beherrsche-Methode löst die dynamische Programmierung Probleme, indem sie die Lösungen von Teilproblemen kombiniert. Diese Teilprobleme können sich dabei überlappen,\nd.h. wenn die Teilprobleme ihrerseits jeweils die gleichen Teil-Teil-probleme lösen müssen. Das DP löst jedes Teilproblem genau einmal und speichert dessen Lösung als Teilergebnis in einer Tabelle oder auch Matrix\nab. Dadurch vermeiden wir den Aufwand, die Lösung eines Teilteilproblems jedes Mal wieder neu zu berechnen, wenn es uns wieder begegnet."]], ["p", [], ["Als einer der klassischen Vertreter der dynamischen Programmierung kann der Floyd-Warshall-Algorithmus das kürzeste-Pfad-Problem für alle Knotenpaare auf einen gerichteten Graphen lösen."]], ["h2", [], ["Der Floyd-Warshall-Algorithmus"]], ["p", [], ["Der Floyd-Warshall-Algorithmus nutzt das Prinzip der dynamischen Programmierung, um in einem gewichteten Graphen den kürzesten Pfad zwischen allen Paaren von Knoten zu berechnen.\nFür alle Knoten mit dem Index k zwischen 1 und N (N ist die Anzahl der Knoten des Graphen) wird überprüft, ob der bisher bekannte Pfad zwischen Knotenpaaren verkürzt wird wenn er\nüber den Knoten k führt (und sich damit aus den 2 Teilpfaden von den Knoten zu k zusammensetzt) oder nicht.\nDabei wird die Matrix für jeden Knoten k von 1 bis N aufgerufen, die Veränderungen werden gespeichert und dann als Grundlage für die nächste Iteration verwendet."]], ["p", [], ["Unten siehst du das gleiche Netzerk, wie rechts. Um die Adjazensmatrix des Netzwerks zu sehen, drücke ", ["action", [["onClick", ["expression", "if(visnum==0){visnum=1}else{visnum=0};"]]], ["hier"]], ".", ["NetworkSteps", [["i", ["variable", "i"]], ["j", ["variable", "j"]], ["k", ["variable", "k"]]], []], ["Button", [["onClick", ["expression", "\n    step--;\n    k = Math.floor( (step-1)/((dim-1)*(dim-1)))%(dim)+1;\n    j = (step-1)%(dim-1) +1;\n    // if j>=k: j++\n    if (((step-1)%(dim-1) +1)>=(Math.floor( (step-1)/((dim-1)*(dim-1)))%(dim)+1)){\n      j = (step-1)%(dim-1) +2;\n    };\n    i = Math.floor((step-1)/(dim-1))%(dim-1)+1;\n    // if i>=k: i++\n    if ((Math.floor((step-1)/(dim-1))%(dim-1)+1)>=(Math.floor( (step-1)/((dim-1)*(dim-1)))%(dim)+1)){\n      i = Math.floor((step-1)/(dim-1))%(dim-1)+2;\n    };\n    "]]], ["\n<"]], " ", ["Button", [["onClick", ["expression", "\n    step++;\n    k = Math.floor( (step+1)/((dim-1)*(dim-1)))%(dim)+1;\n    j = (step+1)%(dim-1) +1;\n    // if j>=k: j++\n    if (((step+1)%(dim-1) +1)>=(Math.floor( (step+1)/((dim-1)*(dim-1)))%(dim)+1)){\n      j = (step+1)%(dim-1) +2;\n    };\n    i = Math.floor((step+1)/(dim-1))%(dim-1)+1;\n    // if i>=k: i++\n    if ((Math.floor((step+1)/(dim-1))%(dim-1)+1)>=(Math.floor( (step+1)/((dim-1)*(dim-1)))%(dim)+1)){\n      i = Math.floor((step+1)/(dim-1))%(dim-1)+2;\n    };\n    "]]], ["\n>"]]]], ["p", [], ["Der Pseudocode unten zeigt dir welcher Vergleich für jede Iteration gemacht wird."]], ["D3Pseudocode", [["className", ["value", "d3-component"]], ["newPseudocode", ["variable", "newPseudocode"]], ["state", ["variable", "state"]], ["i", ["variable", "i"]], ["k", ["variable", "k"]], ["j", ["variable", "j"]]], []], ["p", [], ["Nachdem du ein paar Schritte durchgegangen bist, hast du das Prinzip bestimmt verstanden. Wir hoffen mit der Visualisierung\ngeholfen zu haben!"]], ["h2", [], ["Resultat des Algorithmus"]], ["p", [], ["Die ursprüngliche Matrix sah so aus:", ["d3InitMatrix", [], []], "\nDie finale Matrix sieht nun so aus:", ["D3FinalMatrix", [["ignite", ["value", 0]], ["i", ["value", 4]], ["j", ["value", 4]], ["k", ["value", 5]]], []]]], ["p", [], ["Lizenz: ", ["link", [["text", ["value", "CC-BY-SA 4.0 international"]], ["url", ["value", "https://creativecommons.org/licenses/by-sa/4.0/legalcode"]]], []]]]]]];
 
 },{}],"__IDYLL_COMPONENTS__":[function(require,module,exports){
 'use strict';
@@ -69809,11 +69960,12 @@ module.exports = {
 	'action': require('/home/ben/Desktop/Visualization/PIG/node_modules/idyll-components/dist/cjs/action.js'),
 	'network-steps': require('/home/ben/Desktop/Visualization/PIG/components/NetworkSteps.js'),
 	'd3-pseudocode': require('/home/ben/Desktop/Visualization/PIG/components/d3pseudocode.js'),
+	'd3-init-matrix': require('/home/ben/Desktop/Visualization/PIG/components/d3InitMatrix.js'),
 	'd3-final-matrix': require('/home/ben/Desktop/Visualization/PIG/components/d3FinalMatrix.js'),
 	'text-container': require('/home/ben/Desktop/Visualization/PIG/node_modules/idyll-components/dist/cjs/text-container.js')
 };
 
-},{"/home/ben/Desktop/Visualization/PIG/components/Fixed2.js":"/home/ben/Desktop/Visualization/PIG/components/Fixed2.js","/home/ben/Desktop/Visualization/PIG/components/NetworkClick.js":"/home/ben/Desktop/Visualization/PIG/components/NetworkClick.js","/home/ben/Desktop/Visualization/PIG/components/NetworkSteps.js":"/home/ben/Desktop/Visualization/PIG/components/NetworkSteps.js","/home/ben/Desktop/Visualization/PIG/components/blankComponent.js":"/home/ben/Desktop/Visualization/PIG/components/blankComponent.js","/home/ben/Desktop/Visualization/PIG/components/d3FinalMatrix.js":"/home/ben/Desktop/Visualization/PIG/components/d3FinalMatrix.js","/home/ben/Desktop/Visualization/PIG/components/d3matrix.js":"/home/ben/Desktop/Visualization/PIG/components/d3matrix.js","/home/ben/Desktop/Visualization/PIG/components/d3pseudocode.js":"/home/ben/Desktop/Visualization/PIG/components/d3pseudocode.js","/home/ben/Desktop/Visualization/PIG/components/smalld3matrix.js":"/home/ben/Desktop/Visualization/PIG/components/smalld3matrix.js","/home/ben/Desktop/Visualization/PIG/node_modules/idyll-components/dist/cjs/action.js":"/home/ben/Desktop/Visualization/PIG/node_modules/idyll-components/dist/cjs/action.js","/home/ben/Desktop/Visualization/PIG/node_modules/idyll-components/dist/cjs/button.js":"/home/ben/Desktop/Visualization/PIG/node_modules/idyll-components/dist/cjs/button.js","/home/ben/Desktop/Visualization/PIG/node_modules/idyll-components/dist/cjs/header.js":"/home/ben/Desktop/Visualization/PIG/node_modules/idyll-components/dist/cjs/header.js","/home/ben/Desktop/Visualization/PIG/node_modules/idyll-components/dist/cjs/link.js":"/home/ben/Desktop/Visualization/PIG/node_modules/idyll-components/dist/cjs/link.js","/home/ben/Desktop/Visualization/PIG/node_modules/idyll-components/dist/cjs/svg.js":"/home/ben/Desktop/Visualization/PIG/node_modules/idyll-components/dist/cjs/svg.js","/home/ben/Desktop/Visualization/PIG/node_modules/idyll-components/dist/cjs/text-container.js":"/home/ben/Desktop/Visualization/PIG/node_modules/idyll-components/dist/cjs/text-container.js"}],"__IDYLL_CONTEXT__":[function(require,module,exports){
+},{"/home/ben/Desktop/Visualization/PIG/components/Fixed2.js":"/home/ben/Desktop/Visualization/PIG/components/Fixed2.js","/home/ben/Desktop/Visualization/PIG/components/NetworkClick.js":"/home/ben/Desktop/Visualization/PIG/components/NetworkClick.js","/home/ben/Desktop/Visualization/PIG/components/NetworkSteps.js":"/home/ben/Desktop/Visualization/PIG/components/NetworkSteps.js","/home/ben/Desktop/Visualization/PIG/components/blankComponent.js":"/home/ben/Desktop/Visualization/PIG/components/blankComponent.js","/home/ben/Desktop/Visualization/PIG/components/d3FinalMatrix.js":"/home/ben/Desktop/Visualization/PIG/components/d3FinalMatrix.js","/home/ben/Desktop/Visualization/PIG/components/d3InitMatrix.js":"/home/ben/Desktop/Visualization/PIG/components/d3InitMatrix.js","/home/ben/Desktop/Visualization/PIG/components/d3matrix.js":"/home/ben/Desktop/Visualization/PIG/components/d3matrix.js","/home/ben/Desktop/Visualization/PIG/components/d3pseudocode.js":"/home/ben/Desktop/Visualization/PIG/components/d3pseudocode.js","/home/ben/Desktop/Visualization/PIG/components/smalld3matrix.js":"/home/ben/Desktop/Visualization/PIG/components/smalld3matrix.js","/home/ben/Desktop/Visualization/PIG/node_modules/idyll-components/dist/cjs/action.js":"/home/ben/Desktop/Visualization/PIG/node_modules/idyll-components/dist/cjs/action.js","/home/ben/Desktop/Visualization/PIG/node_modules/idyll-components/dist/cjs/button.js":"/home/ben/Desktop/Visualization/PIG/node_modules/idyll-components/dist/cjs/button.js","/home/ben/Desktop/Visualization/PIG/node_modules/idyll-components/dist/cjs/header.js":"/home/ben/Desktop/Visualization/PIG/node_modules/idyll-components/dist/cjs/header.js","/home/ben/Desktop/Visualization/PIG/node_modules/idyll-components/dist/cjs/link.js":"/home/ben/Desktop/Visualization/PIG/node_modules/idyll-components/dist/cjs/link.js","/home/ben/Desktop/Visualization/PIG/node_modules/idyll-components/dist/cjs/svg.js":"/home/ben/Desktop/Visualization/PIG/node_modules/idyll-components/dist/cjs/svg.js","/home/ben/Desktop/Visualization/PIG/node_modules/idyll-components/dist/cjs/text-container.js":"/home/ben/Desktop/Visualization/PIG/node_modules/idyll-components/dist/cjs/text-container.js"}],"__IDYLL_CONTEXT__":[function(require,module,exports){
 
 module.exports = function () {
 

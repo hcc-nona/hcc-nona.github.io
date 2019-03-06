@@ -20,8 +20,8 @@
 Diese Knoten können durch sogenannte Kanten verbunden sein. Gilt die Kante zwischen zwei Knoten
 für beide Richtungen, so spricht man von einem ungerichteten Graphen</p><span class="isvg pending"></span><p>Im Gegenteil kann auch eine Kante nur für eine Richtung gelten. Deshalb wird der folgende Graph auch
 gerichteter Graph genannt.</p><span class="isvg pending"></span><p>Außerdem kann jede Kante ein Gewicht haben. Das nächste Bild zeigt einen vollständigen Graphen.</p><span class="isvg pending"></span><p>Jedes Netzwerk ist definiert durch die Anzahl der Knoten und die Kanten, welche sie verbinden. Dadurch kann man
-zu jeden Netzwerk eine Matrix angeben, die die Verbindungen des Netzwerks abbildet. Diese Matrix wird <a url="https://de.wikipedia.org/wiki/Adjazenzmatrix" href="https://de.wikipedia.org/wiki/Adjazenzmatrix">Adjazenzmatrix</a> genannt. Der Matrixeintrag mit Spalte 1 und Zeile 2
-gibt dann das Gewicht der Verbindung von Knoten 1 zum Knoten 2 an. Gibt es keine Verbindung von 1 nach 2, dann wird das Gewicht als
+zu jeden Netzwerk eine Matrix angeben, die die Verbindungen des Netzwerks abbildet. Diese Matrix wird<a url="https://de.wikipedia.org/wiki/Adjazenzmatrix" href="https://de.wikipedia.org/wiki/Adjazenzmatrix">Adjazenzmatrix</a> genannt. Der Matrixeintrag in Zeile 1 und Spalte 2
+gibt das Gewicht der Verbindung von Knoten 1 zum Knoten 2 an. Gibt es keine Verbindung von 1 nach 2, wird das Gewicht als
 unendlich aufgefasst.<div style="width:100%"></div></p><h2>Dynamische Programmierung</h2><p>Dynamische Programmierung ist eine Methode zum algorithmischen Lösen eines Optimierungsproblems, indem dieses in gleichartige Teilprobleme zerlegt wird und die Zwischenresultaten systematische gespeichert werden.
 Wie die Teile-und-Beherrsche-Methode löst die dynamische Programmierung Probleme, indem sie die Lösungen von Teilproblemen kombiniert. Diese Teilprobleme können sich dabei überlappen,
 d.h. wenn die Teilprobleme ihrerseits jeweils die gleichen Teil-Teil-probleme lösen müssen. Das DP löst jedes Teilproblem genau einmal und speichert dessen Lösung als Teilergebnis in einer Tabelle oder auch Matrix
@@ -31,8 +31,8 @@ Für alle Knoten mit dem Index k zwischen 1 und N (N ist die Anzahl der Knoten d
 Dabei wird die Matrix für jeden Knoten k von 1 bis N aufgerufen, die Veränderungen werden gespeichert und dann als Grundlage für die nächste Iteration verwendet.</p><p>Unten siehst du das gleiche Netzerk, wie rechts. Um die Adjazensmatrix des Netzwerks zu sehen, drücke <span class="idyll-action">hier</span>.<div style="width:100%"></div><button>
 &lt;</button> <button>
 &gt;</button></p><p>Der Pseudocode unten zeigt dir welcher Vergleich für jede Iteration gemacht wird.</p><div class="d3-component" style="width:100%"></div><p>Nachdem du ein paar Schritte durchgegangen bist, hast du das Prinzip bestimmt verstanden. Wir hoffen mit der Visualisierung
-geholfen zu haben!</p><p>Lizenz: <a url="https://creativecommons.org/licenses/by-sa/2.0/" href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA 2.0</a></p><h2>Resultat des Algorithmus</h2><p>Die ursprüngliche Matrix sah so aus:<div style="width:100%"></div>
-Die finale Matrix sieht nun so aus:<div style="width:100%"></div></p></div></div></div></div>
+geholfen zu haben!</p><h2>Resultat des Algorithmus</h2><p>Die ursprüngliche Matrix sah so aus:<div style="width:100%"></div>
+Die finale Matrix sieht nun so aus:<div style="width:100%"></div></p><p>Lizenz: <a url="https://creativecommons.org/licenses/by-sa/4.0/legalcode" href="https://creativecommons.org/licenses/by-sa/4.0/legalcode">CC-BY-SA 4.0 international</a></p></div></div></div></div>
     <script src="static/idyll_index.js"></script>
   </body>
 </html>
